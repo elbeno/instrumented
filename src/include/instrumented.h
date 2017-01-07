@@ -42,32 +42,42 @@ template <typename T>
 struct instrumented : public instrumented_base
 {
   template <typename = std::enable_if_t<std::is_default_constructible<T>::value>>
-  instrumented() {
+  instrumented() noexcept(std::is_nothrow_default_constructible<T>::value) {
     ++get_op_counts()[DefaultConstruct];
   }
 
-  explicit instrumented(T&& a) : t(std::move(a)) {
+  explicit instrumented(const T& a)
+    noexcept(std::is_nothrow_copy_constructible<T>::value)
+    : t(a) {
     ++get_op_counts()[Construct];
   }
-  explicit instrumented(const T& a) : t(a) {
+  explicit instrumented(T&& a)
+    noexcept(std::is_nothrow_move_constructible<T>::value)
+    : t(std::move(a)) {
     ++get_op_counts()[Construct];
   }
 
-  instrumented(const instrumented& a) : t(a.t) {
+  instrumented(const instrumented& a)
+     noexcept(std::is_nothrow_copy_constructible<T>::value)
+    : t(a.t) {
     ++get_op_counts()[CopyConstruct];
   }
-  instrumented(instrumented&& a) : t(std::move(a).t) {
+  instrumented(instrumented&& a)
+    noexcept(std::is_nothrow_move_constructible<T>::value)
+    : t(std::move(a.t)) {
     ++get_op_counts()[MoveConstruct];
   }
 
-  instrumented& operator=(const instrumented& a) {
+  instrumented& operator=(const instrumented& a)
+    noexcept(std::is_nothrow_copy_assignable<T>::value) {
     ++get_op_counts()[CopyAssign];
     t = a.t;
     return *this;
   }
-  instrumented& operator=(instrumented&& a) {
+  instrumented& operator=(instrumented&& a)
+    noexcept(std::is_nothrow_move_assignable<T>::value) {
     ++get_op_counts()[MoveAssign];
-    t = std::move(a).t;
+    t = std::move(a.t);
     return *this;
   }
 
