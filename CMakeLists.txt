@@ -95,5 +95,4 @@ macro(ADD_TESTINATOR_TESTS executable)
   ADD_INDIVIDUAL_TESTS(${executable} "COMPLEXITY_PROPERTY" "ComplexityProperty")
 endmacro()
 
-add_subdirectory (src/lib)
 add_subdirectory (src/test)
